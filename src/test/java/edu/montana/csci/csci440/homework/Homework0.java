@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Homework0 {
     @Test
+    //test comment to commit
     void fixMe(){
         assertTrue(true);
     }
