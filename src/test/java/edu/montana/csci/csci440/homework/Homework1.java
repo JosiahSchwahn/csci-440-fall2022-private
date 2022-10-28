@@ -8,7 +8,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Homework1 extends DBTest {
-
     @Test
     /*
      * Write a query in the string below that returns all artists that have an 'A' in their name
@@ -17,7 +16,6 @@ public class Homework1 extends DBTest {
         List<Map<String, Object>> results = executeSQL("SELECT name FROM artists WHERE name like \"%A%\"");
         assertEquals(211, results.size());
     }
-
     @Test
     /*
      * Write a query in the string below that returns all artists that have more than one album
