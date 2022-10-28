@@ -36,6 +36,7 @@ public class Homework2 extends DBTest {
         assertEquals("AC/DC", results.get(0).get("ArtistName"));
         assertEquals("For Those About To Rock We Salute You", results.get(0).get("AlbumTitle"));
 
+
     }
 
     @Test
