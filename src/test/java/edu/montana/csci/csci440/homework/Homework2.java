@@ -15,6 +15,8 @@ public class Homework2 extends DBTest {
      * Create a view tracksPlus to display the artist, song title, album, and genre for all tracks.
      */
     public void createTracksPlusView(){
+        /*Test Note IGNORE*/
+
         //TODO fill this in
         executeDDL("CREATE VIEW tracksPlus AS\n" +
                 "SELECT tracks.*,\n" +
