@@ -16,7 +16,19 @@ public class Homework2 extends DBTest {
      */
     public void createTracksPlusView(){
         //TODO fill this in
-        executeDDL("CREATE VIEW tracksPlus");
+        executeDDL("CREATE VIEW tracksPlus AS\n" +
+                "SELECT tracks.*,\n" +
+                "       albums.Title as AlbumTitle,\n" +
+                "       artists.Name as ArtistName,\n" +
+                "       tracks.Name as TrackName,\n" +
+                "       genres.Name as GenreName\n" +
+                "FROM tracks\n" +
+                "        JOIN albums ON\n" +
+                "            tracks.AlbumId = albums.AlbumId\n" +
+                "        JOIN artists ON\n" +
+                "            albums.ArtistId = artists.ArtistId\n" +
+                "        JOIN genres ON\n" +
+                "        tracks.GenreId = genres.GenreId;");
 
         List<Map<String, Object>> results = executeSQL("SELECT * FROM tracksPlus ORDER BY TrackId");
         assertEquals(3503, results.size());
@@ -36,8 +48,33 @@ public class Homework2 extends DBTest {
      */
     public void createGrammyInfoTable(){
         //TODO fill these in
-        executeDDL("create table grammy_categories");
-        executeDDL("create table grammy_infos");
+        executeDDL("CREATE TABLE grammy_categories(\n" +
+                "\n" +
+                "    Name NVARCHAR(160),\n" +
+                "    GrammyCategoryId INTEGER PRIMARY KEY\n" +
+                ");");
+        executeDDL("CREATE TABLE grammy_infos\n" +
+                "(\n" +
+                "\n" +
+                "    Status NVARCHAR(160) NOT NULL,\n" +
+                "    ArtistId INTEGER,\n" +
+                "    AlbumId INTEGER,\n" +
+                "    TrackId INTEGER,\n" +
+                "    GrammyCategoryId INTEGER,\n" +
+                "\n" +
+                "    FOREIGN KEY (ArtistId)\n" +
+                "        REFERENCES artists (ArtistId),\n" +
+                "\n" +
+                "    FOREIGN KEY (AlbumId)\n" +
+                "        REFERENCES albums (AlbumId),\n" +
+                "\n" +
+                "    FOREIGN KEY (TrackId)\n" +
+                "        REFERENCES tracks (TrackId),\n" +
+                "\n" +
+                "     FOREIGN KEY (GrammyCategoryId)\n" +
+                "        REFERENCES grammy_categories(GrammyCategoryId)\n" +
+                "\n" +
+                ");");
 
         // TEST CODE
         executeUpdate("INSERT INTO grammy_categories(Name) VALUES ('Greatest Ever');");
@@ -61,7 +98,13 @@ public class Homework2 extends DBTest {
         Integer before = (Integer) executeSQL("SELECT COUNT(*) as COUNT FROM genres").get(0).get("COUNT");
 
         //TODO fill this in
-        executeUpdate("INSERT");
+        executeUpdate("INSERT INTO genres (Name)\n" +
+                "VALUES ('Genre1'),\n" +
+                "       ('Genre2'),\n" +
+                "       ('Genre3'),\n" +
+                "       ('Genre4'),\n" +
+                "       ('Genre5')\n" +
+                ";");
 
         Integer after = (Integer) executeSQL("SELECT COUNT(*) as COUNT FROM genres").get(0).get("COUNT");
         assertEquals(before + 5, after);
