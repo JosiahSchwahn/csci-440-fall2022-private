@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.lang.*;
 
 public class Employee extends Model {
 
@@ -38,11 +39,20 @@ public class Employee extends Model {
     @Override
     public boolean verify() {
         _errors.clear(); // clear any existing errors
-        if (firstName == null || "".equals(firstName)) {
+        if (this.getFirstName() == null || "".equals(this.getFirstName())) {
             addError("FirstName can't be null or blank!");
         }
-        if (lastName == null || "".equals(lastName)) {
+        if (this.getLastName() == null || "".equals(this.getLastName())) {
             addError("LastName can't be null!");
+        }
+        if(this.getEmail() == null || "".equals(this.getEmail())){
+            addError("Need to enter a valid email address");
+        }
+        //indexOf() returns -1 if char is not in String object
+        if(this.getEmail() != null) {
+            if (this.getEmail().indexOf("@") == -1) {
+                addError("This is an invalid email Address");
+            }
         }
         return !hasErrors();
     }
@@ -52,11 +62,9 @@ public class Employee extends Model {
         if (verify()) {
             try (Connection conn = DB.connect();
                  PreparedStatement stmt = conn.prepareStatement(
-                         "UPDATE employees SET FirstName=?, LastName=?, Email=? WHERE EmployeeId=?")) {
-                stmt.setString(1, this.getFirstName());
-                stmt.setString(2, this.getLastName());
-                stmt.setString(3, this.getEmail());
-                stmt.setLong(4, this.getEmployeeId());
+                         "UPDATE employees SET Email=? WHERE EmployeeId=?")) {
+                stmt.setString(1, this.getEmail());
+                stmt.setLong(2, this.getEmployeeId());
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException sqlException) {

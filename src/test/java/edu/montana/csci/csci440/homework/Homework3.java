@@ -33,17 +33,18 @@ public class Homework3 extends DBTest {
 
         try(Connection connection = DB.connect()){
             connection.setAutoCommit(false);
-            PreparedStatement subtract = connection.prepareStatement("TODO");
-            subtract.setLong(1, 0);
-            subtract.setLong(2, 0);
+            PreparedStatement subtract = connection.prepareStatement("UPDATE tracks SET Milliseconds = Milliseconds - ? WHERE TrackId = ?");
+            subtract.setLong(1, 10);
+            subtract.setLong(2, track1.getTrackId());
             subtract.execute();
 
-            PreparedStatement add = connection.prepareStatement("TODO");
-            subtract.setLong(1, 0);
-            subtract.setLong(2, 0);
-            subtract.execute();
+            PreparedStatement add = connection.prepareStatement("UPDATE tracks SET Milliseconds = Milliseconds + ? WHERE TrackId = ?");
+            add.setLong(1, 10);
+            add.setLong(2, track2.getTrackId());
+            add.execute();
 
             // commit with the connection
+            connection.commit();
         }
 
         // refresh tracks from db
@@ -58,20 +59,34 @@ public class Homework3 extends DBTest {
      * Select tracks that have been sold more than once (> 1)
      *
      * Select the albumbs that have tracks that have been sold more than once (> 1)
-     *   NOTE: This is NOT the same as albums whose tracks have been sold more than once!
-     *         An album could have had three tracks, each sold once, and should not be included
-     *         in this result.  It should only include the albums of the tracks found in the first
+     * NOTE: This is NOT the same as albums whose tracks
+     * have been sold more than once!
+     * An album could have had three tracks,
+     * each sold once, and should not be included
+     * in this result.  It should only include the albums of
+     * the tracks found in the first
      *         query.
      * */
     public void selectPopularTracksAndTheirAlbums() throws SQLException {
 
         // HINT: join to invoice items and do a group by/having to get the right answer
-        List<Map<String, Object>> tracks = executeSQL("");
+        List<Map<String, Object>> tracks = executeSQL("SELECT *, COUNT(invoice_items.InvoiceId) AS Count\n" +
+                "FROM tracks\n" +
+                "         JOIN invoice_items ON tracks.TrackId = invoice_items.TrackId\n" +
+                "GROUP BY invoice_items.TrackId\n" +
+                "HAVING Count > 1;");
         assertEquals(256, tracks.size());
 
-        // HINT: join to tracks and invoice items and do a group by/having to get the right answer
-        //       note: you will need to use the DISTINCT operator to get the right result!
-        List<Map<String, Object>> albums = executeSQL("");
+        // HINT: join to tracks and invoice items and do a
+        // group by/having to get the right answer
+        //note: you will need to use the DISTINCT
+        //operator to get the right result!
+        List<Map<String, Object>> albums = executeSQL("SELECT DISTINCT albums.Title ,COUNT(invoice_items.InvoiceId) AS NumberSold\n" +
+                "FROM albums\n" +
+                "    JOIN tracks ON albums.AlbumId =tracks.AlbumId\n" +
+                "    JOIN invoice_items ON tracks.TrackId = invoice_items.TrackId\n" +
+                "GROUP BY invoice_items.TrackId\n" +
+                "HAVING NumberSold > 1");
         assertEquals(166, albums.size());
     }
 
@@ -84,7 +99,7 @@ public class Homework3 extends DBTest {
      * */
     public void selectCustomersMeetingCriteria() throws SQLException {
         // HINT: join to invoice items and do a group by/having to get the right answer
-        List<Map<String, Object>> tracks = executeSQL("" );
+        List<Map<String, Object>> tracks = executeSQL("No Idea how to do this one...");
         assertEquals(21, tracks.size());
     }
 
