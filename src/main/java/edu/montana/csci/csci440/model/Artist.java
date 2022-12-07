@@ -16,12 +16,15 @@ public class Artist extends Model {
     Long artistId;
     String name;
 
+    String namePrev; //old name
     public Artist() {
     }
 
     private Artist(ResultSet results) throws SQLException {
         name = results.getString("Name");
         artistId = results.getLong("ArtistId");
+        namePrev = name;
+
     }
 
     public List<Album> getAlbums(){
@@ -40,6 +43,7 @@ public class Artist extends Model {
         return name;
     }
 
+    public String getNamePrev(){return namePrev;} //added to get old name
     public void setName(String name) {
         this.name = name;
     }
@@ -50,7 +54,7 @@ public class Artist extends Model {
 
     public static List<Artist> all(int page, int count) {
 
-        int offset = (page * 100) - 100;
+        int offset = (page * count) - count;
 
         try (Connection conn = DB.connect();
              PreparedStatement stmt = conn.prepareStatement(
@@ -74,9 +78,16 @@ public class Artist extends Model {
         if (verify()) {
             try (Connection conn = DB.connect();
                  PreparedStatement stmt = conn.prepareStatement(
-                         "UPDATE artists SET Name =? WHERE ArtistId=? ")) {
-                stmt.setString(1, getName());
-                stmt.setLong(2, getArtistId());
+                         "UPDATE artists SET Name=? WHERE " +
+                                 "Name=? AND ArtistId=?")) {
+                stmt.setString(1, this.getName());
+                stmt.setString(2, this.getNamePrev());
+                stmt.setLong(3, this.getArtistId());
+
+                int i = stmt.executeUpdate();
+                if (i<1){
+                    return false;
+                }
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException sqlException) {

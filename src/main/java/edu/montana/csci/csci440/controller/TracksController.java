@@ -42,6 +42,9 @@ public class TracksController {
             }
             // TODO - implement cache of count w/ Redis
             long totalTracks = Track.count();
+
+
+
             return Web.renderTemplate("templates/tracks/index.vm",
                     "tracks", tracks, "totalTracks", totalTracks);
         });

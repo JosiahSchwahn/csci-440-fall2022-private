@@ -57,7 +57,6 @@ public class TrackTest extends DBTest {
     @Test
     void testValidationWorks() {
         Track track = new Track();
-
         assertFalse(track.verify());
         // expect a name and album
         assertEquals(2, track.getErrors().size());
@@ -84,6 +83,7 @@ public class TrackTest extends DBTest {
         long connectionCount = DB.getConnectionCount();
         String artistName = track.getArtistName();
         assertEquals("AC/DC", artistName);
+
         assertEquals(connectionCount, DB.getConnectionCount());
     }
 
