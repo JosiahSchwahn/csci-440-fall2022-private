@@ -27,38 +27,26 @@
 Resetting DB After Test...
 Resetting DB After Test...
 Resetting DB After Test...
-[ERROR] Tests run: 3, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.316 s <<< FAILURE! - in edu.montana.csci.csci440.homework.Homework3
-[ERROR] useATransactionToSafelyMoveMillisecondsFromOneTrackToAnother  Time elapsed: 0.305 s  <<< ERROR!
-org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (near "TODO": syntax error)
-	at edu.montana.csci.csci440.homework.Homework3.useATransactionToSafelyMoveMillisecondsFromOneTrackToAnother(Homework3.java:36)
-
-[ERROR] selectPopularTracksAndTheirAlbums  Time elapsed: 0.003 s  <<< ERROR!
-java.lang.RuntimeException: java.sql.SQLException: The prepared statement has been finalized
-	at edu.montana.csci.csci440.homework.Homework3.selectPopularTracksAndTheirAlbums(Homework3.java:69)
-Caused by: java.sql.SQLException: The prepared statement has been finalized
-	at edu.montana.csci.csci440.homework.Homework3.selectPopularTracksAndTheirAlbums(Homework3.java:69)
-
-[ERROR] selectCustomersMeetingCriteria  Time elapsed: 0.004 s  <<< ERROR!
-java.lang.RuntimeException: java.sql.SQLException: The prepared statement has been finalized
-	at edu.montana.csci.csci440.homework.Homework3.selectCustomersMeetingCriteria(Homework3.java:87)
-Caused by: java.sql.SQLException: The prepared statement has been finalized
-	at edu.montana.csci.csci440.homework.Homework3.selectCustomersMeetingCriteria(Homework3.java:87)
+[ERROR] Tests run: 3, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.384 s <<< FAILURE! - in edu.montana.csci.csci440.homework.Homework3
+[ERROR] selectCustomersMeetingCriteria  Time elapsed: 0.006 s  <<< ERROR!
+java.lang.RuntimeException: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (near "No": syntax error)
+	at edu.montana.csci.csci440.homework.Homework3.selectCustomersMeetingCriteria(Homework3.java:102)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (near "No": syntax error)
+	at edu.montana.csci.csci440.homework.Homework3.selectCustomersMeetingCriteria(Homework3.java:102)
 
 [INFO] 
 [INFO] Results:
 [INFO] 
 [ERROR] Errors: 
-[ERROR]   Homework3.selectCustomersMeetingCriteria:87->DBTest.executeSQL:58 » Runtime ja...
-[ERROR]   Homework3.selectPopularTracksAndTheirAlbums:69->DBTest.executeSQL:58 » Runtime
-[ERROR]   Homework3.useATransactionToSafelyMoveMillisecondsFromOneTrackToAnother:36 » SQLite
+[ERROR]   Homework3.selectCustomersMeetingCriteria:102->DBTest.executeSQL:58 » Runtime o...
 [INFO] 
-[ERROR] Tests run: 3, Failures: 0, Errors: 3, Skipped: 0
+[ERROR] Tests run: 3, Failures: 0, Errors: 1, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD FAILURE
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  1.379 s
-[INFO] Finished at: 2022-12-02T15:26:30-07:00
+[INFO] Total time:  1.405 s
+[INFO] Finished at: 2022-12-03T14:56:20-07:00
 [INFO] ------------------------------------------------------------------------
 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.22.1:test (default-test) on project CSCI_440_Project: There are test failures.
 [ERROR] 
