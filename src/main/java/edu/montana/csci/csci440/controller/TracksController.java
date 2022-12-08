@@ -42,11 +42,9 @@ public class TracksController {
             }
             // TODO - implement cache of count w/ Redis
             long totalTracks = Track.count();
-
-
-
             return Web.renderTemplate("templates/tracks/index.vm",
                     "tracks", tracks, "totalTracks", totalTracks);
+
         });
 
         get("/tracks/search", (req, resp) -> {
@@ -56,8 +54,9 @@ public class TracksController {
                     search,
                     Web.integerOrNull("ArtistId"),
                     Web.integerOrNull("AlbumId"),
-                    Web.integerOrNull("max"),
-                    Web.integerOrNull("min"));
+                    Web.integerOrNull("MediaTypeId"),
+                    Web.integerOrNull("GenreId"));
+
             return Web.renderTemplate("templates/tracks/search.vm",
                     "tracks", tracks);
         });

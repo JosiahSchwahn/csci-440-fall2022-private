@@ -17,7 +17,6 @@ import java.util.List;
 import edu.montana.csci.csci440.util.Web;
 
 public class Track extends Model {
-
     private Long trackId;
     private Long albumId;
     private Long mediaTypeId;
@@ -26,6 +25,8 @@ public class Track extends Model {
     private Long milliseconds;
     private Long bytes;
     private BigDecimal unitPrice;
+    private String album;
+    private String artist;
 
     public static final String REDIS_CACHE_KEY = "cs440-tracks-count-cache";
 
@@ -46,6 +47,8 @@ public class Track extends Model {
         albumId = results.getLong("AlbumId");
         mediaTypeId = results.getLong("MediaTypeId");
         genreId = results.getLong("GenreId");
+        album = results.getString("Title");
+        artist = results.getString("ArtistName");
     }
 
     @Override
@@ -165,6 +168,7 @@ public class Track extends Model {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public Album getAlbum() {
@@ -266,18 +270,19 @@ public class Track extends Model {
     public String getArtistName() {
         // TODO implement more efficiently
         //  hint: cache on this model object
-        return getAlbum().getArtist().getName();
+        return artist;
     }
 
     public String getAlbumTitle() {
         // TODO implement more efficiently
         //  hint: cache on this model object
-        return getAlbum().getTitle();
+        return album;
     }
 
     public static List<Track> advancedSearch(int page, int count,
                                              String search, Integer albumId, Integer artistId,
-                                             Integer maxRuntime, Integer minRuntime) {
+                                             Integer mediaTypeId, Integer genreId
+                                             ) {
         LinkedList<Object> args = new LinkedList<>();
 
         String query = "SELECT *, artists.Name AS ArtistName FROM tracks " +
@@ -294,19 +299,19 @@ public class Track extends Model {
             query += " AND ArtistId=? ";
             args.add(artistId);
         }
-        if (minRuntime != null) {
-            query += " AND (Milliseconds / 1000)>? ";
-            args.add(minRuntime);
+        if (mediaTypeId != null) {
+            query += " AND MediaTypeId=? ";
+            args.add(mediaTypeId);
         }
-        if (maxRuntime != null) {
-            query += " AND (Milliseconds / 1000)<? ";
-            args.add(maxRuntime);
+        if (genreId != null) {
+            query += " AND GenreId=? ";
+            args.add(genreId);
         }
+
         query += "LIMIT ? ";
         args.add(count);
         query+= "OFFSET ? ";
         args.add((page - 1) * 10);
-
 
         try (Connection conn = DB.connect();
              PreparedStatement stmt = conn.prepareStatement(query)) {
