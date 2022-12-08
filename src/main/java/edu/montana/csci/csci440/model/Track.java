@@ -144,29 +144,16 @@ public class Track extends Model {
     }
 
     public static Long count() {
-        try {
-            Jedis redisClient = new Jedis(); // use this class to access redis and create a cache
-            if (redisClient.exists("count")) {
-                // redis already has stored value for count
-                return Long.valueOf(redisClient.get("count"));
+        try (Connection conn = DB.connect();
+             PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) as Count FROM tracks")) {
+            ResultSet results = stmt.executeQuery();
+            if (results.next()) {
+                return results.getLong("Count");
             } else {
-                // redis does not already have stored value for count
-                try (Connection conn = DB.connect();
-                     PreparedStatement stmt = conn.prepareStatement(
-                             "SELECT COUNT(*) as Count FROM tracks")) {
-                    ResultSet results = stmt.executeQuery();
-                    if (results.next()) {
-                        redisClient.set("count", String.valueOf(results.getLong("Count")));
-                        return results.getLong("Count");
-                    } else {
-                        throw new IllegalStateException("Should find a count!");
-                    }
-                } catch (SQLException sqlException) {
-                    throw new RuntimeException(sqlException);
-                }
+                throw new IllegalStateException("Should find a count!");
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (SQLException sqlException) {
+            throw new RuntimeException(sqlException);
         }
 
     }
@@ -280,32 +267,37 @@ public class Track extends Model {
     }
 
     public static List<Track> advancedSearch(int page, int count,
-                                             String search, Integer albumId, Integer artistId,
-                                             Integer mediaTypeId, Integer genreId
+                                             String search, Integer artistId, Integer albumId,
+                                             Integer maxRuntime, Integer minRuntime
                                              ) {
         LinkedList<Object> args = new LinkedList<>();
 
-        String query = "SELECT *, artists.Name AS ArtistName FROM tracks " +
-                "JOIN albums ON tracks.AlbumId = albums.AlbumId JOIN artists ON albums.ArtistId = " +
-                "artists.ArtistId WHERE tracks.Name LIKE ?";
+        String query = "SELECT *, artists.Name AS ArtistName, albums.Title AS AlbumTitle " +
+                "FROM tracks " +
+                "JOIN albums ON tracks.AlbumId = albums.AlbumId " +
+                "JOIN artists on albums.ArtistId = artists.ArtistId\n" +
+                "WHERE tracks.name LIKE ?";
         args.add("%" + search + "%");
 
-        // Conditionally include the query and argument
-        if (albumId != null) {
-            query += "AND AlbumId=? ";
-            args.add(albumId);
-        }
+        // Here is an example of how to conditionally
         if (artistId != null) {
-            query += " AND ArtistId=? ";
+            query += " AND albums.ArtistId=? ";
             args.add(artistId);
         }
-        if (mediaTypeId != null) {
-            query += " AND MediaTypeId=? ";
-            args.add(mediaTypeId);
+
+        if (albumId != null) {
+            query += " AND albums.AlbumId=? ";
+            args.add(albumId);
         }
-        if (genreId != null) {
-            query += " AND GenreId=? ";
-            args.add(genreId);
+
+        if (maxRuntime != null) {
+            query += " AND milliseconds < ? ";
+            args.add(maxRuntime);
+        }
+
+        if (minRuntime != null) {
+            query += " AND milliseconds > ? ";
+            args.add(minRuntime);
         }
 
         query += "LIMIT ? ";
