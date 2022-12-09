@@ -154,7 +154,7 @@ public class Track extends Model {
 
                 if (results.next()) {
                     redisClient.set(REDIS_CACHE_KEY, Long.toString(results.getLong("Count")));
-                    //return results.getLong("Count");
+                    return results.getLong("Count");
                 } else {
                     throw new IllegalStateException("Should find a count!");
                 }
