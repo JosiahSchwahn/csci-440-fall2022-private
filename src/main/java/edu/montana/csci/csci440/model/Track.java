@@ -144,46 +144,28 @@ public class Track extends Model {
     }
 
     public static Long count() {
-        try {
-            Jedis redisClient = new Jedis(); // use this class to access redis and create a cache
-            if (redisClient.exists("count")) {
-                // redis already has stored value for count
-                return Long.valueOf(redisClient.get("count"));
-            } else {
-                // redis does not already have stored value for count
-                try (Connection conn = DB.connect();
-                     PreparedStatement stmt = conn.prepareStatement(
-                             "SELECT COUNT(*) as Count FROM tracks")) {
-                    ResultSet results = stmt.executeQuery();
-                    if (results.next()) {
-                        redisClient.set("count", String.valueOf(results.getLong("Count")));
-                        return results.getLong("Count");
-                    } else {
-                        throw new IllegalStateException("Should find a count!");
-                    }
-                } catch (SQLException sqlException) {
-                    throw new RuntimeException(sqlException);
+        Jedis redisClient = new Jedis(); // use this class to access redis and create a cache
+        String stringValue = redisClient.get(REDIS_CACHE_KEY);
+        if (stringValue == null) {
+
+            try (Connection conn = DB.connect();
+                 PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) as Count FROM tracks\n")) {
+                ResultSet results = stmt.executeQuery();
+
+                if (results.next()) {
+                    redisClient.set(REDIS_CACHE_KEY, Long.toString(results.getLong("Count")));
+                    //return results.getLong("Count");
+                } else {
+                    throw new IllegalStateException("Should find a count!");
                 }
+            } catch (SQLException sqlException) {
+                throw new RuntimeException(sqlException);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+        return Long.valueOf(redisClient.get(REDIS_CACHE_KEY)).longValue();
 
     }
 
-    public static long queryCount(){
-        try (Connection conn = DB.connect();
-             PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) as Count FROM tracks")) {
-            ResultSet results = stmt.executeQuery();
-            if (results.next()) {
-                return results.getLong("Count");
-            } else {
-                throw new IllegalStateException("Should find a count!");
-            }
-        } catch (SQLException sqlException) {
-            throw new RuntimeException(sqlException);
-        }
-    }
 
     public Album getAlbum() {
         return Album.find(albumId);
