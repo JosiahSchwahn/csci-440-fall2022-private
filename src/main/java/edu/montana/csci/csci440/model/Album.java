@@ -62,10 +62,10 @@ public class Album extends Model {
     public boolean verify() {
         _errors.clear(); // clear any existing errors
         if (this.getTitle() == null || "".equals(this.getTitle())) {
-            addError("Title name can't be blank");
+            addError("Title name can't be blank1");
         }
         if (this.getArtistId() == null || "".equals(this.getArtistId())) {
-            addError("Artist Id can't be blank");
+            addError("Artist Id can't be blank2");
         }
         return !hasErrors();
     }
@@ -78,8 +78,8 @@ public class Album extends Model {
 
                 stmt.setString(1, getTitle());
                 stmt.setLong(2, getArtistId());
-                stmt.executeUpdate();
                 albumId = DB.getLastID(conn);
+                stmt.executeUpdate();
 
                 return true;
             } catch (SQLException sqlException) {
@@ -120,7 +120,7 @@ public class Album extends Model {
     }
 
     public static List<Album> all(int page, int count) {
-        int offset = (page * 100) - 100;
+        int offset = (page * count) - count;
         try (Connection conn = DB.connect();
              PreparedStatement stmt = conn.prepareStatement(
                      "SELECT * FROM albums LIMIT ? OFFSET ?"

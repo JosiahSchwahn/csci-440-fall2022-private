@@ -144,6 +144,34 @@ public class Track extends Model {
     }
 
     public static Long count() {
+        try {
+            Jedis redisClient = new Jedis(); // use this class to access redis and create a cache
+            if (redisClient.exists("count")) {
+                // redis already has stored value for count
+                return Long.valueOf(redisClient.get("count"));
+            } else {
+                // redis does not already have stored value for count
+                try (Connection conn = DB.connect();
+                     PreparedStatement stmt = conn.prepareStatement(
+                             "SELECT COUNT(*) as Count FROM tracks")) {
+                    ResultSet results = stmt.executeQuery();
+                    if (results.next()) {
+                        redisClient.set("count", String.valueOf(results.getLong("Count")));
+                        return results.getLong("Count");
+                    } else {
+                        throw new IllegalStateException("Should find a count!");
+                    }
+                } catch (SQLException sqlException) {
+                    throw new RuntimeException(sqlException);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static long queryCount(){
         try (Connection conn = DB.connect();
              PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) as Count FROM tracks")) {
             ResultSet results = stmt.executeQuery();
@@ -155,7 +183,6 @@ public class Track extends Model {
         } catch (SQLException sqlException) {
             throw new RuntimeException(sqlException);
         }
-
     }
 
     public Album getAlbum() {
@@ -169,6 +196,7 @@ public class Track extends Model {
         return null;
     }
     public List<Playlist> getPlaylists(){
+
         try (Connection conn = DB.connect();
              PreparedStatement stmt = conn.prepareStatement(
                      "SELECT * FROM playlists JOIN playlist_track ON playlists.PlaylistId = " +
@@ -323,12 +351,17 @@ public class Track extends Model {
     }
 
     public static List<Track> search(int page, int count, String orderBy, String search) {
-        String query = "SELECT * FROM tracks WHERE name LIKE ? LIMIT ?";
+        String query = "SELECT *, artists.Name AS ArtistName FROM tracks JOIN albums ON " +
+                "tracks.AlbumId = albums.AlbumId JOIN artists ON albums.ArtistId = artists.ArtistId WHERE " +
+                "(tracks.Name LIKE ? OR albums.Title LIKE ? OR artists.Name LIKE ?) LIMIT ? OFFSET ?";
         search = "%" + search + "%";
         try (Connection conn = DB.connect();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, search);
-            stmt.setInt(2, count);
+            stmt.setString(2, search);
+            stmt.setString(3, search);
+            stmt.setInt(4, count);
+            stmt.setInt(5, (page - 1) * count);
             ResultSet results = stmt.executeQuery();
             List<Track> resultList = new LinkedList<>();
             while (results.next()) {
@@ -341,7 +374,9 @@ public class Track extends Model {
     }
 
     public static List<Track> forAlbum(Long albumId) {
-        String query = "SELECT * FROM tracks WHERE AlbumId=?";
+
+        String query = "SELECT *, artists.Name AS ArtistName FROM tracks JOIN albums ON tracks.AlbumId = albums.AlbumId " +
+                "JOIN artists ON albums.ArtistId = artists.ArtistId WHERE tracks.AlbumId=?";
         try (Connection conn = DB.connect();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setLong(1, albumId);
@@ -366,6 +401,8 @@ public class Track extends Model {
     }
 
     public static List<Track> all(int page, int count, String orderBy) {
+
+
 
         LinkedList<Object> args = new LinkedList<>();
 
